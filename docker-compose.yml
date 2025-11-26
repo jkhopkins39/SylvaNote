@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: sylvanote-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    environment:
+      - DATABASE_URL=sqlite:////data/database.db
+      - DATA_DIR=/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: sylvanote-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+    environment:
+      # For client-side requests to backend (browser to localhost)
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      # For server-side requests to backend (container to container)
+      - API_URL=http://backend:8000
+      # Location for markdown files if accessed via FS
+      - DATA_DIR=/data
+    depends_on:
+      - backend
+    restart: unless-stopped
+
